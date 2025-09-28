@@ -41,3 +41,16 @@ lexer = lexer_.Lexer("2 + 3 ^ 2 * 2")
 parser = parser_.Parser(lexer)
 tree = parser.parse()
 print(interpreter.visit(tree))  # Output: 20 (3^2 = 9 *2 =18 +2)
+
+lexer = lexer_.Lexer("x = 5")
+parser = parser_.Parser(lexer)
+interpreter = interpreter_.Interpreter(parser)
+print(interpreter.visit(parser.parse()))  # Output: 5
+
+lexer = lexer_.Lexer("y = x + 3")
+parser = parser_.Parser(lexer)
+print(interpreter.visit(parser.parse()))  # Output: 8
+
+lexer = lexer_.Lexer("y * 2")
+parser = parser_.Parser(lexer)
+print(interpreter.visit(parser.parse()))  # Output: 16

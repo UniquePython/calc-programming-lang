@@ -35,6 +35,14 @@ class Lexer:
         else:
             return tokens_.INTEGER(int(result))
     
+    def id(self):
+        """Handle identifiers (variable names)"""
+        result = ""
+        while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
+            result += self.current_char
+            self.advance()
+        return tokens_.ID(result)
+
     
     def get_next_token(self):
         """Lexical analyzer (scanner)"""
@@ -46,6 +54,9 @@ class Lexer:
 
             if self.current_char.isdigit() or self.current_char == ".":
                 return self.number()
+
+            if self.current_char.isalpha() or self.current_char == "_":
+                return self.id()
 
             if self.current_char == '+':
                 self.advance()
@@ -86,6 +97,11 @@ class Lexer:
             if self.current_char == ')':
                 self.advance()
                 return tokens_.RPAREN(")")
+            
+            if self.current_char == "=":
+                self.advance()
+                return tokens_.ASSIGN("=")
+
 
             raise Exception(f"Invalid character: {self.current_char}")
         

@@ -13,8 +13,30 @@ class Parser:
         else:
             raise Exception(f"Unexpected token {self.current_token}, expected {token_type}")
     
+    def assignment(self):
+        if isinstance(self.current_token, tokens_.ID):
+            var_token = self.current_token
+            # Temporarily advance to check next token
+            saved_pos = self.lexer.pos
+            saved_char = self.lexer.current_char
+            self.eat(tokens_.ID)
+            if self.current_token.type == "ASSIGN":
+                op = self.current_token
+                self.eat(tokens_.ASSIGN)
+                right = self.expr()
+                return ast_.Assign(ast_.Var(var_token), op, right)
+            else:
+                # restore lexer state if no assignment
+                self.lexer.pos = saved_pos - 1  # -1 because eat() advanced
+                self.lexer.current_char = saved_char
+                self.current_token = var_token
+        return self.expr()
+
+
+
+    
     def factor(self):
-        """factor : (PLUS | MINUS) factor | INTEGER | FLOAT | LPAREN expr RPAREN"""
+        """factor : (PLUS | MINUS) factor | INTEGER | FLOAT | LPAREN expr RPAREN | ID"""
         token = self.current_token
 
         if token.type == "PLUS":
@@ -40,6 +62,10 @@ class Parser:
             node = self.expr()
             self.eat(tokens_.RPAREN)
             return node
+
+        elif token.type == "ID":
+            self.eat(tokens_.ID)
+            return ast_.Var(token)
 
         else:
             raise Exception(f"Unexpected token in factor: {token}")
@@ -92,4 +118,5 @@ class Parser:
 
 
     def parse(self):
-        return self.expr()
+        return self.assignment()
+

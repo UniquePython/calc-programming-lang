@@ -51,6 +51,14 @@ class RPAREN(Token):
     def __init__(self, value) -> None:
         super().__init__("RPAREN", value)
 
+class ID(Token):
+    def __init__(self, value) -> None:
+        super().__init__("ID", value)
+
+class ASSIGN(Token):
+    def __init__(self, value) -> None:
+        super().__init__("ASSIGN", value)
+
 class EOF(Token):
     def __init__(self, value) -> None:
         super().__init__("EOF", value)
