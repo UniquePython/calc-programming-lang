@@ -1,0 +1,95 @@
+import tokens_
+import ast_
+
+
+class Parser:
+    def __init__(self, lexer):
+        self.lexer = lexer
+        self.current_token = self.lexer.get_next_token()
+    
+    def eat(self, token_type):
+        if isinstance(self.current_token, token_type):
+            self.current_token = self.lexer.get_next_token()
+        else:
+            raise Exception(f"Unexpected token {self.current_token}, expected {token_type}")
+    
+    def factor(self):
+        """factor : (PLUS | MINUS) factor | INTEGER | FLOAT | LPAREN expr RPAREN"""
+        token = self.current_token
+
+        if token.type == "PLUS":
+            self.eat(tokens_.PLUS)
+            node = self.factor()
+            return ast_.BinOp(left=ast_.Num(tokens_.INTEGER(0)), op=token, right=node)
+
+        elif token.type == "MINUS":
+            self.eat(tokens_.MINUS)
+            node = self.factor()
+            return ast_.BinOp(left=ast_.Num(tokens_.INTEGER(0)), op=token, right=node)
+
+        elif token.type == "INTEGER":
+            self.eat(tokens_.INTEGER)
+            return ast_.Num(token)
+
+        elif token.type == "FLOAT":
+            self.eat(tokens_.FLOAT)
+            return ast_.Num(token)
+
+        elif token.type == "LPAREN":
+            self.eat(tokens_.LPAREN)
+            node = self.expr()
+            self.eat(tokens_.RPAREN)
+            return node
+
+        else:
+            raise Exception(f"Unexpected token in factor: {token}")
+
+
+    def power(self):
+        """power : factor (POW power)?  (right-associative)"""
+        node = self.factor()
+        
+        while self.current_token.type == "POW":
+            token = self.current_token
+            self.eat(tokens_.POW)
+            node = ast_.BinOp(left=node, op=token, right=self.power())
+        
+        return node
+
+
+    def term(self):
+        """term : power ((MUL | DIV | INTDIV | MOD) power)*"""
+        node = self.power()
+        
+        while self.current_token.type in ("MUL", "DIV", "INTDIV", "MOD"):
+            token = self.current_token
+            if isinstance(token, tokens_.MUL):
+                self.eat(tokens_.MUL)
+            elif isinstance(token, tokens_.DIV):
+                self.eat(tokens_.DIV)
+            elif isinstance(token, tokens_.INTDIV):
+                self.eat(tokens_.INTDIV)
+            elif isinstance(token, tokens_.MOD):
+                self.eat(tokens_.MOD)
+            node = ast_.BinOp(left=node, op=token, right=self.power())
+        
+        return node
+
+
+    def expr(self):
+        """expr : term ((PLUS | MINUS) term)*"""
+        node = self.term()
+        
+        while self.current_token.type in ("PLUS", "MINUS"):
+            token = self.current_token
+            if isinstance(token, tokens_.PLUS):
+                self.eat(tokens_.PLUS)
+            elif isinstance(token, tokens_.MINUS):
+                self.eat(tokens_.MINUS)
+            node = ast_.BinOp(left=node, op=token, right=self.term())
+        
+        return node
+
+
+    def parse(self):
+        return self.expr()
