@@ -1,11 +1,18 @@
 import ast_
 import tokens_
 
+import math
+
 
 class Interpreter:
     def __init__(self, parser):
         self.parser = parser
-        self.GLOBAL_SCOPE = {}
+        self.GLOBAL_SCOPE = {
+            "pi": math.pi,
+            "e": math.e,
+            "tau": math.tau,
+            "phi": (1 + math.sqrt(5)) / 2,
+        }
     
     def visit(self, node):
         if isinstance(node, ast_.Num):
@@ -48,6 +55,8 @@ class Interpreter:
             raise Exception(f"Variable '{var_name}' not defined")
 
     def visit_Assign(self, node):
+        if node.left.value in ["pi", "e", "phi", "tau"]:
+            raise Exception(f"Cannot assign to constant '{node.left.value}'")
         var_name = node.left.value
         value = self.visit(node.right)
         self.GLOBAL_SCOPE[var_name] = value
