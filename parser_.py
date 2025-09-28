@@ -13,6 +13,16 @@ class Parser:
         else:
             raise Exception(f"Unexpected token {self.current_token}, expected {token_type}")
     
+    def peek(self):
+        """Return the next token without consuming current"""
+        saved_pos = self.lexer.pos
+        saved_char = self.lexer.current_char
+        token = self.lexer.get_next_token()
+        # restore lexer state
+        self.lexer.pos = saved_pos
+        self.lexer.current_char = saved_char
+        return token
+    
     def assignment(self):
         if isinstance(self.current_token, tokens_.ID):
             var_token = self.current_token
@@ -32,8 +42,6 @@ class Parser:
                 self.current_token = var_token
         return self.expr()
 
-
-    
     def factor(self):
         """factor : (PLUS | MINUS) factor | INTEGER | FLOAT | LPAREN expr RPAREN | ID"""
         token = self.current_token
@@ -63,8 +71,19 @@ class Parser:
             return node
 
         elif token.type == "ID":
-            self.eat(tokens_.ID)
-            return ast_.Var(token)
+            next_token = self.peek()
+            if next_token.type == "LPAREN":
+                # Function call
+                func_name = token
+                self.eat(tokens_.ID)
+                self.eat(tokens_.LPAREN)
+                arg = self.expr()
+                self.eat(tokens_.RPAREN)
+                return ast_.FuncCall(func_name, arg)
+            else:
+                # Variable
+                self.eat(tokens_.ID)
+                return ast_.Var(token)
 
         else:
             raise Exception(f"Unexpected token in factor: {token}")
@@ -114,16 +133,6 @@ class Parser:
             node = ast_.BinOp(left=node, op=token, right=self.term())
         
         return node
-
-    def peek(self):
-        """Return the next token without consuming current"""
-        saved_pos = self.lexer.pos
-        saved_char = self.lexer.current_char
-        token = self.lexer.get_next_token()
-        # restore lexer state
-        self.lexer.pos = saved_pos
-        self.lexer.current_char = saved_char
-        return token
 
     def statement(self):
         """Single statement: assignment or expression"""

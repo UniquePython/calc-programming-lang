@@ -13,6 +13,41 @@ class Interpreter:
             "tau": math.tau,
             "phi": (1 + math.sqrt(5)) / 2,
         }
+        self.FUNC_TABLE = {
+            "sqrt": math.sqrt,
+            "cbrt": math.cbrt,
+            "ceil": math.ceil,
+            "floor": math.floor,
+            "deg": math.degrees,
+            "rad": math.radians,
+            "exp": math.exp,
+            "abs": math.fabs,
+            "fact": math.factorial,
+            "gamma": math.gamma,
+            "sin": math.sin,
+            "cos": math.cos,
+            "tan": math.tan,
+            "cot": lambda x: 1/math.tan(x),
+            "sec": lambda x: 1/math.cos(x),
+            "csc": lambda x: 1/math.sin(x),
+            "sinh": math.sinh,
+            "cosh": math.cosh,
+            "tanh": math.tanh,
+            "coth": lambda x: 1/math.tanh(x),
+            "sech": lambda x: 1/math.cosh(x),
+            "csch": lambda x: 1/math.sinh(x),
+            "asin": math.asin,
+            "acos": math.acos,
+            "asec": lambda x: math.acos(1/x),
+            "acsc": lambda x: math.asin(1/x),
+            "asinh": math.asinh,
+            "acosh": math.acosh,
+            "asech": lambda x: math.acosh(1/x),
+            "acsch": lambda x: math.asinh(1/x),
+            "ln": math.log,
+            "log": math.log10,
+        }
+
     
     def visit(self, node):
         if isinstance(node, ast_.Num):
@@ -25,6 +60,8 @@ class Interpreter:
             return self.visit_Assign(node)
         elif isinstance(node, ast_.Compound):
             return self.visit_Compound(node)
+        elif isinstance(node, ast_.FuncCall):
+            return self.visit_FuncCall(node)
         else:
             raise Exception(f"No visit method for {type(node)}")
     
@@ -68,6 +105,13 @@ class Interpreter:
             result = self.visit(child)  # last statement result
         return result   
 
+    def visit_FuncCall(self, node):
+        func_name = node.func_name.value
+        if func_name not in self.FUNC_TABLE:
+            raise Exception(f"Function '{func_name}' not defined")
+        arg_val = self.visit(node.arg)
+        return self.FUNC_TABLE[func_name](arg_val)
+    
     def interpret(self):
         tree = self.parser.parse()
         return self.visit(tree)

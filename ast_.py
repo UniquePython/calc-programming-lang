@@ -27,3 +27,9 @@ class Compound(AST):
     """Represents multiple statements"""
     def __init__(self):
         self.children = []
+
+class FuncCall(AST):
+    def __init__(self, func_name, arg):
+        self.func_name = func_name  # ID token
+        self.arg = arg              # expression AST node
+
