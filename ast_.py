@@ -22,3 +22,8 @@ class Assign(AST):
         self.left = left  # Var node
         self.op = op      # should be '=' token
         self.right = right
+
+class Compound(AST):
+    """Represents multiple statements"""
+    def __init__(self):
+        self.children = []

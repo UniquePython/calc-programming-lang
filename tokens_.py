@@ -59,6 +59,10 @@ class ASSIGN(Token):
     def __init__(self, value) -> None:
         super().__init__("ASSIGN", value)
 
+class SEMI(Token):
+    def __init__(self, value) -> None:
+        super().__init__("SEMI", value)
+
 class EOF(Token):
     def __init__(self, value) -> None:
         super().__init__("EOF", value)

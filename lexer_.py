@@ -97,11 +97,14 @@ class Lexer:
             if self.current_char == ')':
                 self.advance()
                 return tokens_.RPAREN(")")
-            
+
             if self.current_char == "=":
                 self.advance()
                 return tokens_.ASSIGN("=")
 
+            if self.current_char == ";":
+                self.advance()
+                return tokens_.SEMI(";")
 
             raise Exception(f"Invalid character: {self.current_char}")
         

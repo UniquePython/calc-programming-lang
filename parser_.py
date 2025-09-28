@@ -33,7 +33,6 @@ class Parser:
         return self.expr()
 
 
-
     
     def factor(self):
         """factor : (PLUS | MINUS) factor | INTEGER | FLOAT | LPAREN expr RPAREN | ID"""
@@ -116,7 +115,41 @@ class Parser:
         
         return node
 
+    def peek(self):
+        """Return the next token without consuming current"""
+        saved_pos = self.lexer.pos
+        saved_char = self.lexer.current_char
+        token = self.lexer.get_next_token()
+        # restore lexer state
+        self.lexer.pos = saved_pos
+        self.lexer.current_char = saved_char
+        return token
+
+    def statement(self):
+        """Single statement: assignment or expression"""
+        if self.current_token.type == "ID":
+            next_token = self.peek()
+            if next_token.type == "ASSIGN":
+                left = ast_.Var(self.current_token)
+                self.eat(tokens_.ID)
+                op = self.current_token
+                self.eat(tokens_.ASSIGN)
+                right = self.expr()
+                return ast_.Assign(left, op, right)
+        # Otherwise, just an expression
+        return self.expr()
+
+
+    def statement_list(self):
+        """Handle multiple statements separated by semicolons"""
+        node = ast_.Compound()
+        node.children.append(self.statement())
+        
+        while self.current_token and self.current_token.type == "SEMI":
+            self.eat(tokens_.SEMI)
+            node.children.append(self.statement())
+        
+        return node
 
     def parse(self):
-        return self.assignment()
-
+        return self.statement_list()

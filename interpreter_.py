@@ -16,6 +16,8 @@ class Interpreter:
             return self.visit_Var(node)
         elif isinstance(node, ast_.Assign):
             return self.visit_Assign(node)
+        elif isinstance(node, ast_.Compound):
+            return self.visit_Compound(node)
         else:
             raise Exception(f"No visit method for {type(node)}")
     
@@ -50,6 +52,12 @@ class Interpreter:
         value = self.visit(node.right)
         self.GLOBAL_SCOPE[var_name] = value
         return value
+    
+    def visit_Compound(self, node):
+        result = None
+        for child in node.children:
+            result = self.visit(child)  # last statement result
+        return result   
 
     def interpret(self):
         tree = self.parser.parse()
