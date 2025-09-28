@@ -106,6 +106,10 @@ class Lexer:
                 self.advance()
                 return tokens_.SEMI(";")
 
+            if self.current_char == ",":
+                self.advance()
+                return tokens_.COMMA(",")
+
             raise Exception(f"Invalid character: {self.current_char}")
         
         return tokens_.EOF(None)

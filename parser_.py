@@ -73,15 +73,20 @@ class Parser:
         elif token.type == "ID":
             next_token = self.peek()
             if next_token.type == "LPAREN":
-                # Function call
                 func_name = token
                 self.eat(tokens_.ID)
                 self.eat(tokens_.LPAREN)
-                arg = self.expr()
+
+                args = []
+                if self.current_token.type != "RPAREN":
+                    args.append(self.expr())
+                    while self.current_token.type == "COMMA":
+                        self.eat(tokens_.COMMA)
+                        args.append(self.expr())
+
                 self.eat(tokens_.RPAREN)
-                return ast_.FuncCall(func_name, arg)
+                return ast_.FuncCall(func_name, args)
             else:
-                # Variable
                 self.eat(tokens_.ID)
                 return ast_.Var(token)
 

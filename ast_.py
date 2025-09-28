@@ -29,7 +29,7 @@ class Compound(AST):
         self.children = []
 
 class FuncCall(AST):
-    def __init__(self, func_name, arg):
+    def __init__(self, func_name, args):
         self.func_name = func_name  # ID token
-        self.arg = arg              # expression AST node
+        self.args = args            # list of expression AST nodes
 

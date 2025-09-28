@@ -14,6 +14,13 @@ class Interpreter:
             "phi": (1 + math.sqrt(5)) / 2,
         }
         self.FUNC_TABLE = {
+            "pow": pow,
+            "max": max,
+            "min": min,
+            "gcd": math.gcd,
+            "lcm": math.lcm,
+            "comb": math.comb,
+            "perm": math.perm,
             "sqrt": math.sqrt,
             "cbrt": math.cbrt,
             "ceil": math.ceil,
@@ -45,7 +52,7 @@ class Interpreter:
             "asech": lambda x: math.acosh(1/x),
             "acsch": lambda x: math.asinh(1/x),
             "ln": math.log,
-            "log": math.log10,
+            "log": lambda x, base=10: math.log(x, base),
         }
 
     
@@ -109,8 +116,9 @@ class Interpreter:
         func_name = node.func_name.value
         if func_name not in self.FUNC_TABLE:
             raise Exception(f"Function '{func_name}' not defined")
-        arg_val = self.visit(node.arg)
-        return self.FUNC_TABLE[func_name](arg_val)
+        arg_values = [self.visit(arg) for arg in node.args]
+        return self.FUNC_TABLE[func_name](*arg_values)
+
     
     def interpret(self):
         tree = self.parser.parse()
